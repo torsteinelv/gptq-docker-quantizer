@@ -1,4 +1,4 @@
-# Bruk Nvidias bilde for Ubuntu 24.04
+# Bruk Nvidias bilde for Ubuntu 24.04 med CUDA 13
 FROM nvidia/cuda:13.1.1-cudnn-devel-ubuntu24.04
 
 ENV PYTHONUNBUFFERED=1 \
@@ -8,13 +8,14 @@ ENV PYTHONUNBUFFERED=1 \
     PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True" \
     TOKENIZERS_PARALLELISM=false
 
-# Installer Python 3 (som er 3.12 i Ubuntu 24.04) og byggeverktøy
+# 1. Installer systempakker. Vi inkluderer python3-pip og python3-venv.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     build-essential \
     python3 \
     python3-dev \
     python3-pip \
+    python3-venv \
     ninja-build \
     && rm -rf /var/lib/apt/lists/*
 
@@ -23,14 +24,18 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 
 WORKDIR /app
 
-# Installer uv (vi bruker --break-system-packages fordi Ubuntu 24.04 er streng på system-python)
-RUN pip install --no-cache-dir -U pip setuptools wheel uv --break-system-packages
+# 2. Installer 'uv' uten å prøve å oppgradere pip eller setuptools.
+# Vi bruker --break-system-packages kun for å få lagt inn uv.
+RUN pip install --no-cache-dir uv --break-system-packages
 
+# 3. Kopier requirements
 COPY requirements.txt .
 
-# Bruker uv til å installere pakker system-wide
+# 4. Bruk uv til å installere resten. 
+# Siden uv er en isolert binærfil, bryr den seg ikke om pip-konfliktene over.
 RUN uv pip install --system --no-cache-dir -r requirements.txt
 
+# 5. Kopier resten av koden
 COPY entrypoint.sh quantize.py ./
 RUN chmod +x entrypoint.sh
 
