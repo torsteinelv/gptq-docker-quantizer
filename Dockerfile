@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.11 \
     python3.11-dev \
     python3-pip \
-    python3-venv \
     ninja-build \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -21,15 +20,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN ln -sf /usr/bin/python3.11 /usr/bin/python && \
     ln -sf /usr/bin/pip3 /usr/bin/pip
 
-WORKDIR /app
-
 RUN pip install --no-cache-dir -U pip setuptools wheel uv
 
-COPY requirements.txt .
-RUN uv pip install --system --no-cache-dir -r requirements.txt
+ENV CUDA_ARCH_LIST="8.0;8.6;8.9" \
+    TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9"
 
-# Installer GPTQModel i build-steget, ikke i entrypoint
-RUN pip install --no-cache-dir -U git+https://github.com/ModelCloud/GPTQModel.git
+RUN git clone https://github.com/ModelCloud/GPTQModel.git /tmp/GPTQModel && \
+    cd /tmp/GPTQModel && \
+    pip install -v . --no-build-isolation && \
+    rm -rf /tmp/GPTQModel
 
 COPY quantize.py .
 COPY entrypoint.sh .
