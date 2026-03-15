@@ -1,5 +1,5 @@
 # Bruk Nvidias offisielle bilde med CUDA 12.4 og byggeverktøy
-FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
+FROM nvidia/cuda:13.1.1-cudnn-devel-ubuntu24.04
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
