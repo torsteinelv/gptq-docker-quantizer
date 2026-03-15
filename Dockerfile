@@ -14,28 +14,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     python3.11 \
     python3.11-dev \
-    python3-pip \
-    python3-venv \
+    python3.11-venv \
     ninja-build \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-RUN ln -sf /usr/bin/python3.11 /usr/bin/python && \
-    ln -sf /usr/bin/pip3 /usr/bin/pip
+RUN python3.11 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir -U pip setuptools wheel
+RUN python -m pip install --no-cache-dir -U pip setuptools wheel
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir -r requirements.txt
 
-# Verifiser at torch faktisk finnes før GPTQModel bygges
-RUN python -c "import torch; print(torch.__version__)"
+RUN python -c "import sys, torch; print(sys.executable); print(torch.__version__)"
 
 RUN git clone https://github.com/ModelCloud/GPTQModel.git /tmp/GPTQModel && \
     cd /tmp/GPTQModel && \
-    pip install -v . --no-build-isolation && \
+    python -m pip install -v . --no-build-isolation && \
     rm -rf /tmp/GPTQModel
 
 COPY quantize.py /app/quantize.py
