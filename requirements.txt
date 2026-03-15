@@ -7,3 +7,4 @@ sentencepiece
 protobuf
 safetensors
 python-dotenv
+transformers==5.3.0
