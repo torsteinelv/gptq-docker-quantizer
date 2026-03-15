@@ -1,5 +1,5 @@
-numpy
-torch==2.10.0
+numpy<2.0.0
+torch==2.6.0
 accelerate
 datasets
 huggingface_hub
@@ -7,4 +7,4 @@ sentencepiece
 protobuf
 safetensors
 python-dotenv
-transformers==5.3.0
+transformers
